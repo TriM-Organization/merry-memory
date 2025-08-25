@@ -117,6 +117,31 @@ func (m *MCWorld) Close() (err error) {
 	return nil
 }
 
+// LoadBlock ..
+func (m *MCWorld) LoadBlock(x int32, y int16, z int32) (blockRuntimeID uint32, err error) {
+	var exists bool
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	chunkPos := define.ChunkPos{x >> 4, z >> 4}
+	c, ok := m.cachedChunks[chunkPos]
+	if !ok {
+		c, exists, err = m.gameSaves.LoadChunk(define.Dimension(define.DimensionIDOverworld), chunkPos)
+		if err != nil {
+			return 0, fmt.Errorf("LoadBlock: %v", err)
+		}
+		if !exists {
+			return block.AirRuntimeID, nil
+		}
+	}
+
+	x -= chunkPos[0] << 4
+	z -= chunkPos[1] << 4
+
+	return c.Block(uint8(x), y, uint8(z), 0), nil
+}
+
 // SetBlock ..
 func (m *MCWorld) SetBlock(x int32, y int16, z int32, blockRuntimeID uint32) error {
 	var exists bool
@@ -135,8 +160,8 @@ func (m *MCWorld) SetBlock(x int32, y int16, z int32, blockRuntimeID uint32) err
 		if !exists {
 			c = chunk.NewChunk(block.AirRuntimeID, define.Dimension(define.DimensionIDOverworld).Range())
 		}
+		m.cachedChunks[chunkPos] = c
 	}
-	m.cachedChunks[chunkPos] = c
 
 	x -= chunkPos[0] << 4
 	z -= chunkPos[1] << 4
@@ -146,7 +171,7 @@ func (m *MCWorld) SetBlock(x int32, y int16, z int32, blockRuntimeID uint32) err
 }
 
 // SetBlockNBT ..
-func (m *MCWorld) SetBlockNBT(x int32, y int16, z int32, blockNBT map[string]any) error {
+func (m *MCWorld) SetBlockNBT(x int32, y int32, z int32, blockNBT map[string]any) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 

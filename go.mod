@@ -10,7 +10,6 @@ require (
 require (
 	github.com/deatil/go-cryptobin v1.1.1005 // indirect
 	github.com/df-mc/goleveldb v1.1.9 // indirect
-	github.com/df-mc/worldupgrader v1.0.15 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -22,4 +21,6 @@ require (
 require (
 	github.com/TriM-Organization/bedrock-world-operator v1.3.1
 	github.com/andybalholm/brotli v1.2.0
+	github.com/df-mc/worldupgrader v1.0.15
+	github.com/lucasb-eyer/go-colorful v1.2.0
 )
