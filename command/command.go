@@ -3,7 +3,7 @@ package command
 import "github.com/TriM-Organization/merry-memory/protocol/encoding"
 
 const (
-	IDCreateConstantString = iota + 1
+	IDCreateConstantString uint16 = iota + 1
 	_
 	_
 	_
@@ -58,44 +58,42 @@ type Command interface {
 type CommandFunc func() Command
 
 // BDumpCommandPool ..
-func BDumpCommandPool() map[uint16]CommandFunc {
-	return map[uint16]CommandFunc{
-		1:  func() Command { return &CreateConstantString{} },
-		5:  func() Command { return &PlaceBlockWithBlockStates{} },
-		6:  func() Command { return &AddInt16ZValue0{} },
-		7:  func() Command { return &PlaceBlock{} },
-		8:  func() Command { return &AddZValue0{} },
-		9:  func() Command { return &NoOperation{} },
-		12: func() Command { return &AddInt32ZValue0{} },
-		13: func() Command { return &PlaceBlockWithBlockStatesDeprecated{} },
-		14: func() Command { return &AddXValue{} },
-		15: func() Command { return &SubtractXValue{} },
-		16: func() Command { return &AddYValue{} },
-		17: func() Command { return &SubtractYValue{} },
-		18: func() Command { return &AddZValue{} },
-		19: func() Command { return &SubtractZValue{} },
-		20: func() Command { return &AddInt16XValue{} },
-		21: func() Command { return &AddInt32XValue{} },
-		22: func() Command { return &AddInt16YValue{} },
-		23: func() Command { return &AddInt32YValue{} },
-		24: func() Command { return &AddInt16ZValue{} },
-		25: func() Command { return &AddInt32ZValue{} },
-		26: func() Command { return &SetCommandBlockData{} },
-		27: func() Command { return &PlaceBlockWithCommandBlockData{} },
-		28: func() Command { return &AddInt8XValue{} },
-		29: func() Command { return &AddInt8YValue{} },
-		30: func() Command { return &AddInt8ZValue{} },
-		31: func() Command { return &UseRuntimeIDPool{} },
-		32: func() Command { return &PlaceRuntimeBlock{} },
-		33: func() Command { return &PlaceRuntimeBlockWithUint32RuntimeID{} },
-		34: func() Command { return &PlaceRuntimeBlockWithCommandBlockData{} },
-		35: func() Command { return &PlaceRuntimeBlockWithCommandBlockDataAndUint32RuntimeID{} },
-		36: func() Command { return &PlaceCommandBlockWithCommandBlockData{} },
-		37: func() Command { return &PlaceRuntimeBlockWithChestData{} },
-		38: func() Command { return &PlaceRuntimeBlockWithChestDataAndUint32RuntimeID{} },
-		39: func() Command { return &AssignDebugData{} },
-		40: func() Command { return &PlaceBlockWithChestData{} },
-		41: func() Command { return &PlaceBlockWithNBTData{} },
-		88: func() Command { return &Terminate{} },
-	}
+var BDumpCommandPool = map[uint16]CommandFunc{
+	IDCreateConstantString:                  func() Command { return &CreateConstantString{} },
+	IDPlaceBlockWithBlockStates:             func() Command { return &PlaceBlockWithBlockStates{} },
+	IDAddInt16ZValue0:                       func() Command { return &AddInt16ZValue0{} },
+	IDPlaceBlock:                            func() Command { return &PlaceBlock{} },
+	IDAddZValue0:                            func() Command { return &AddZValue0{} },
+	IDNOP:                                   func() Command { return &NoOperation{} },
+	IDAddInt32ZValue0:                       func() Command { return &AddInt32ZValue0{} },
+	IDPlaceBlockWithBlockStatesDeprecated:   func() Command { return &PlaceBlockWithBlockStatesDeprecated{} },
+	IDAddXValue:                             func() Command { return &AddXValue{} },
+	IDSubtractXValue:                        func() Command { return &SubtractXValue{} },
+	IDAddYValue:                             func() Command { return &AddYValue{} },
+	IDSubtractYValue:                        func() Command { return &SubtractYValue{} },
+	IDAddZValue:                             func() Command { return &AddZValue{} },
+	IDSubtractZValue:                        func() Command { return &SubtractZValue{} },
+	IDAddInt16XValue:                        func() Command { return &AddInt16XValue{} },
+	IDAddInt32XValue:                        func() Command { return &AddInt32XValue{} },
+	IDAddInt16YValue:                        func() Command { return &AddInt16YValue{} },
+	IDAddInt32YValue:                        func() Command { return &AddInt32YValue{} },
+	IDAddInt16ZValue:                        func() Command { return &AddInt16ZValue{} },
+	IDAddInt32ZValue:                        func() Command { return &AddInt32ZValue{} },
+	IDSetCommandBlockData:                   func() Command { return &SetCommandBlockData{} },
+	IDPlaceBlockWithCommandBlockData:        func() Command { return &PlaceBlockWithCommandBlockData{} },
+	IDAddInt8XValue:                         func() Command { return &AddInt8XValue{} },
+	IDAddInt8YValue:                         func() Command { return &AddInt8YValue{} },
+	IDAddInt8ZValue:                         func() Command { return &AddInt8ZValue{} },
+	IDUseRuntimeIDPool:                      func() Command { return &UseRuntimeIDPool{} },
+	IDPlaceRuntimeBlock:                     func() Command { return &PlaceRuntimeBlock{} },
+	IDPlaceRuntimeBlockWithUint32RuntimeID:  func() Command { return &PlaceRuntimeBlockWithUint32RuntimeID{} },
+	IDPlaceRuntimeBlockWithCommandBlockData: func() Command { return &PlaceRuntimeBlockWithCommandBlockData{} },
+	IDPlaceRuntimeBlockWithCommandBlockDataAndUint32RuntimeID: func() Command { return &PlaceRuntimeBlockWithCommandBlockDataAndUint32RuntimeID{} },
+	IDPlaceCommandBlockWithCommandBlockData:                   func() Command { return &PlaceCommandBlockWithCommandBlockData{} },
+	IDPlaceRuntimeBlockWithChestData:                          func() Command { return &PlaceRuntimeBlockWithChestData{} },
+	IDPlaceRuntimeBlockWithChestDataAndUint32RuntimeID:        func() Command { return &PlaceRuntimeBlockWithChestDataAndUint32RuntimeID{} },
+	IDAssignDebugData:         func() Command { return &AssignDebugData{} },
+	IDPlaceBlockWithChestData: func() Command { return &PlaceBlockWithChestData{} },
+	IDPlaceBlockWithNBTData:   func() Command { return &PlaceBlockWithNBTData{} },
+	IDTerminate:               func() Command { return &Terminate{} },
 }
