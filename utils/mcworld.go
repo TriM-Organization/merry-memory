@@ -1,0 +1,182 @@
+package utils
+
+import (
+	"context"
+	"fmt"
+	"sync"
+	"time"
+
+	"github.com/TriM-Organization/bedrock-world-operator/block"
+	"github.com/TriM-Organization/bedrock-world-operator/chunk"
+	"github.com/TriM-Organization/bedrock-world-operator/define"
+	"github.com/TriM-Organization/bedrock-world-operator/world"
+)
+
+// BlockPos ..
+type BlockPos [3]int32
+
+// MCWorld ..
+type MCWorld struct {
+	mu *sync.Mutex
+
+	givenCtx          context.Context
+	internalCtx       context.Context
+	internalCtxCancel context.CancelFunc
+	closer            *sync.Once
+
+	gameSaves    *world.BedrockWorld
+	cachedChunks map[define.ChunkPos]*chunk.Chunk
+	cachedNBTs   map[define.ChunkPos]map[BlockPos]map[string]any
+}
+
+// NewMCWorld ..
+func NewMCWorld(path string, ctx context.Context) (result *MCWorld, err error) {
+	mcw, err := world.Open(path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("NewMCWorld: %v", err)
+	}
+
+	internalCtx, internalCtxCancel := context.WithCancel(context.Background())
+	result = &MCWorld{
+		mu:                new(sync.Mutex),
+		givenCtx:          ctx,
+		internalCtx:       internalCtx,
+		internalCtxCancel: internalCtxCancel,
+		closer:            new(sync.Once),
+		gameSaves:         mcw,
+		cachedChunks:      make(map[define.ChunkPos]*chunk.Chunk),
+		cachedNBTs:        make(map[define.ChunkPos]map[BlockPos]map[string]any),
+	}
+	result.autoFlush()
+
+	return result, nil
+}
+
+func (m *MCWorld) autoFlush() {
+	go func() {
+		ticker := time.NewTicker(time.Second * 5)
+		defer func() {
+			ticker.Stop()
+			_ = m.Close()
+		}()
+		for {
+			select {
+			case <-ticker.C:
+			case <-m.givenCtx.Done():
+				return
+			case <-m.internalCtx.Done():
+				return
+			}
+			m.Flush()
+		}
+	}()
+}
+
+// Flush ..
+func (m *MCWorld) Flush() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for cp, data := range m.cachedChunks {
+		_ = m.gameSaves.SaveChunk(
+			define.DimensionIDOverworld,
+			cp, data,
+		)
+		m.cachedChunks[cp] = nil
+	}
+	for cp, data := range m.cachedNBTs {
+		nbts := make([]map[string]any, 0)
+		for _, value := range data {
+			nbts = append(nbts, value)
+		}
+		_ = m.gameSaves.SaveNBT(
+			define.DimensionIDOverworld,
+			cp, nbts,
+		)
+		m.cachedNBTs[cp] = nil
+	}
+
+	m.cachedChunks = make(map[define.ChunkPos]*chunk.Chunk)
+	m.cachedNBTs = make(map[define.ChunkPos]map[BlockPos]map[string]any)
+}
+
+// Close ..
+func (m *MCWorld) Close() (err error) {
+	m.closer.Do(func() {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		m.Flush()
+		if err = m.gameSaves.CloseWorld(); err == nil {
+			m.internalCtxCancel()
+		}
+	})
+	if err != nil {
+		m.closer = new(sync.Once)
+		return fmt.Errorf("Close: %v", err)
+	}
+	return nil
+}
+
+// SetBlock ..
+func (m *MCWorld) SetBlock(x int32, y int16, z int32, blockRuntimeID uint32) error {
+	var exists bool
+	var err error
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	chunkPos := define.ChunkPos{x >> 4, z >> 4}
+	c, ok := m.cachedChunks[chunkPos]
+	if !ok {
+		c, exists, err = m.gameSaves.LoadChunk(define.Dimension(define.DimensionIDOverworld), chunkPos)
+		if err != nil {
+			return fmt.Errorf("SetBlock: %v", err)
+		}
+		if !exists {
+			c = chunk.NewChunk(block.AirRuntimeID, define.Dimension(define.DimensionIDOverworld).Range())
+		}
+	}
+	m.cachedChunks[chunkPos] = c
+
+	x -= chunkPos[0] << 4
+	z -= chunkPos[1] << 4
+	c.SetBlock(uint8(x), y, uint8(z), 0, blockRuntimeID)
+
+	return nil
+}
+
+// SetBlockNBT ..
+func (m *MCWorld) SetBlockNBT(x int32, y int16, z int32, blockNBT map[string]any) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	chunkPos := define.ChunkPos{x >> 4, z >> 4}
+	nbtMap, ok := m.cachedNBTs[chunkPos]
+	if !ok {
+		nbts, err := m.gameSaves.LoadNBT(define.Dimension(define.DimensionIDOverworld), chunkPos)
+		if err != nil {
+			return fmt.Errorf("SetBlockNBT: %v", err)
+		}
+		nbtMap = make(map[BlockPos]map[string]any)
+		for _, value := range nbts {
+			x, ok := value["x"].(int32)
+			if !ok {
+				continue
+			}
+			y, ok := value["y"].(int32)
+			if !ok {
+				continue
+			}
+			z, ok := value["z"].(int32)
+			if !ok {
+				continue
+			}
+			nbtMap[BlockPos{x, y, z}] = value
+		}
+	}
+
+	nbtMap[BlockPos{x, int32(y), z}] = blockNBT
+	m.cachedNBTs[chunkPos] = nbtMap
+
+	return nil
+}
