@@ -153,25 +153,27 @@ func (m *MCWorld) SetBlockNBT(x int32, y int16, z int32, blockNBT map[string]any
 	chunkPos := define.ChunkPos{x >> 4, z >> 4}
 	nbtMap, ok := m.cachedNBTs[chunkPos]
 	if !ok {
+		nbtMap = make(map[BlockPos]map[string]any)
+
 		nbts, err := m.gameSaves.LoadNBT(define.Dimension(define.DimensionIDOverworld), chunkPos)
 		if err != nil {
 			return fmt.Errorf("SetBlockNBT: %v", err)
 		}
-		nbtMap = make(map[BlockPos]map[string]any)
+
 		for _, value := range nbts {
-			x, ok := value["x"].(int32)
+			posX, ok := value["x"].(int32)
 			if !ok {
 				continue
 			}
-			y, ok := value["y"].(int32)
+			posY, ok := value["y"].(int32)
 			if !ok {
 				continue
 			}
-			z, ok := value["z"].(int32)
+			posZ, ok := value["z"].(int32)
 			if !ok {
 				continue
 			}
-			nbtMap[BlockPos{x, y, z}] = value
+			nbtMap[BlockPos{posX, posY, posZ}] = value
 		}
 	}
 
