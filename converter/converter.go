@@ -106,7 +106,7 @@ func ConvertBDXToMCWorld(bdxPath string, mcworldPath string) error {
 				converter.runtimeIDPool = runtime_id_pool.RuntimeIdArray_2_1_10
 			default:
 				err = fmt.Errorf(
-					"ConvertBDXToMCWorld: This file is using an unknown runtime id pool %d, we're unable to resolve it.",
+					"ConvertBDXToMCWorld: This file is using an unknown runtime id pool %d, we're unable to resolve it",
 					c.PoolID,
 				)
 			}
