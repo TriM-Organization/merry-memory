@@ -1,0 +1,35 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/TriM-Organization/merry-memory/converter"
+)
+
+func main() {
+	bdxPath := ReadStringFromPanel("请输入 BDX 文件路径: ")
+	mcworldPath := ReadStringFromPanel("请输入 mcworld 文件路径: ")
+
+	err := converter.ConvertBDXToMCWorld(bdxPath, mcworldPath)
+	if err != nil {
+		fmt.Printf("处理时发生错误, 原因是: %v", err)
+	}
+
+	fmt.Println()
+	ReadStringFromPanel("程序运行完成, 按 [回车] 以退出。")
+}
+
+// ReadStringFromPanel ..
+func ReadStringFromPanel(langText string) (result string) {
+	fmt.Print(langText)
+
+	result, _ = bufio.NewReader(os.Stdin).ReadString('\n')
+	result = strings.ReplaceAll(result, "\n", "")
+	result = strings.ReplaceAll(result, "\r", "")
+	result = strings.ReplaceAll(result, "\t", "")
+
+	return
+}

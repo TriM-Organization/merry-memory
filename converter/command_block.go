@@ -17,6 +17,7 @@ func (c *converter) SetCommandBlock(data encoding.CommandBlockData) error {
 		"x":          c.penPos[0],
 		"y":          c.penPos[1],
 		"z":          c.penPos[2],
+		"id":         "CommandBlock",
 	}
 
 	if data.ExecuteOnFirstTick {
@@ -30,14 +31,14 @@ func (c *converter) SetCommandBlock(data encoding.CommandBlockData) error {
 		nbtMap["TrackOutput"] = byte(0)
 	}
 	if data.Conditional {
-		nbtMap["ConditionalMode"] = byte(1)
+		nbtMap["conditionalMode"] = byte(1)
 	} else {
-		nbtMap["ConditionalMode"] = byte(0)
+		nbtMap["conditionalMode"] = byte(0)
 	}
 	if !data.NeedsRedstone {
-		nbtMap["Auto"] = byte(1)
+		nbtMap["auto"] = byte(1)
 	} else {
-		nbtMap["Auto"] = byte(0)
+		nbtMap["auto"] = byte(0)
 	}
 
 	err := c.mcworld.SetBlockNBT(c.penPos[0], c.penPos[1], c.penPos[2], nbtMap)

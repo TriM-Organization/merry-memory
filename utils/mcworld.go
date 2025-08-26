@@ -72,11 +72,8 @@ func (m *MCWorld) autoFlush() {
 	}()
 }
 
-// Flush ..
-func (m *MCWorld) Flush() {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
+// flush ..
+func (m *MCWorld) flush() {
 	for cp, data := range m.cachedChunks {
 		_ = m.gameSaves.SaveChunk(
 			define.DimensionIDOverworld,
@@ -84,6 +81,8 @@ func (m *MCWorld) Flush() {
 		)
 		m.cachedChunks[cp] = nil
 	}
+	m.cachedChunks = make(map[define.ChunkPos]*chunk.Chunk)
+
 	for cp, data := range m.cachedNBTs {
 		nbts := make([]map[string]any, 0)
 		for _, value := range data {
@@ -95,9 +94,14 @@ func (m *MCWorld) Flush() {
 		)
 		m.cachedNBTs[cp] = nil
 	}
-
-	m.cachedChunks = make(map[define.ChunkPos]*chunk.Chunk)
 	m.cachedNBTs = make(map[define.ChunkPos]map[BlockPos]map[string]any)
+}
+
+// Flush ..
+func (m *MCWorld) Flush() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.flush()
 }
 
 // Close ..
@@ -105,7 +109,7 @@ func (m *MCWorld) Close() (err error) {
 	m.closer.Do(func() {
 		m.mu.Lock()
 		defer m.mu.Unlock()
-		m.Flush()
+		m.flush()
 		if err = m.gameSaves.CloseWorld(); err == nil {
 			m.internalCtxCancel()
 		}
@@ -127,7 +131,7 @@ func (m *MCWorld) LoadBlock(x int32, y int16, z int32) (blockRuntimeID uint32, e
 	chunkPos := define.ChunkPos{x >> 4, z >> 4}
 	c, ok := m.cachedChunks[chunkPos]
 	if !ok {
-		c, exists, err = m.gameSaves.LoadChunk(define.Dimension(define.DimensionIDOverworld), chunkPos)
+		c, exists, err = m.gameSaves.LoadChunk(define.DimensionIDOverworld, chunkPos)
 		if err != nil {
 			return 0, fmt.Errorf("LoadBlock: %v", err)
 		}
@@ -153,7 +157,7 @@ func (m *MCWorld) SetBlock(x int32, y int16, z int32, blockRuntimeID uint32) err
 	chunkPos := define.ChunkPos{x >> 4, z >> 4}
 	c, ok := m.cachedChunks[chunkPos]
 	if !ok {
-		c, exists, err = m.gameSaves.LoadChunk(define.Dimension(define.DimensionIDOverworld), chunkPos)
+		c, exists, err = m.gameSaves.LoadChunk(define.DimensionIDOverworld, chunkPos)
 		if err != nil {
 			return fmt.Errorf("SetBlock: %v", err)
 		}
@@ -180,7 +184,7 @@ func (m *MCWorld) SetBlockNBT(x int32, y int32, z int32, blockNBT map[string]any
 	if !ok {
 		nbtMap = make(map[BlockPos]map[string]any)
 
-		nbts, err := m.gameSaves.LoadNBT(define.Dimension(define.DimensionIDOverworld), chunkPos)
+		nbts, err := m.gameSaves.LoadNBT(define.DimensionIDOverworld, chunkPos)
 		if err != nil {
 			return fmt.Errorf("SetBlockNBT: %v", err)
 		}

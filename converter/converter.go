@@ -34,7 +34,7 @@ func ConvertBDXToMCWorld(bdxPath string, mcworldPath string) error {
 	converter := converter{
 		mcworld:      mcworld,
 		constStrings: nil,
-		penPos:       utils.BlockPos{0, 0, 0},
+		penPos:       utils.BlockPos{0, -64, 0},
 	}
 
 	for {

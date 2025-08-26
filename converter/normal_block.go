@@ -51,7 +51,7 @@ func (c *converter) SetBlockByStatesString(blockName string, blockStatesString s
 
 // SetBlockLegacy ..
 func (c *converter) SetBlockLegacy(blockName string, blockData uint16) error {
-	var copiedStates map[string]any
+	copiedStates := make(map[string]any)
 
 	temp, found := blocks.LegacyBlockToRuntimeID(blockName, blockData)
 	if !found {

@@ -27,6 +27,7 @@ func (c *converter) SetChestBlock(data []encoding.ChestSlot) error {
 			"x":     c.penPos[0],
 			"y":     c.penPos[1],
 			"z":     c.penPos[2],
+			"id":    "Chest",
 		},
 	)
 	if err != nil {
