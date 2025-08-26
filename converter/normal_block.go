@@ -14,6 +14,9 @@ import (
 
 // SetBlock ..
 func (c *converter) SetBlock(blockName string, blockStates map[string]any) error {
+	if !strings.HasPrefix(blockName, "minecraft:") {
+		blockName = "minecraft:" + blockName
+	}
 	newBlock := blockupgrader.Upgrade(blockupgrader.BlockState{
 		Name:       blockName,
 		Properties: blockStates,
@@ -52,6 +55,9 @@ func (c *converter) SetBlockByStatesString(blockName string, blockStatesString s
 // SetBlockLegacy ..
 func (c *converter) SetBlockLegacy(blockName string, blockData uint16) error {
 	copiedStates := make(map[string]any)
+	if !strings.HasPrefix(blockName, "minecraft:") {
+		blockName = "minecraft:" + blockName
+	}
 
 	temp, found := blocks.LegacyBlockToRuntimeID(blockName, blockData)
 	if !found {
