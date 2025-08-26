@@ -21,6 +21,8 @@ func init() {
 func main() {
 	pterm.DefaultBox.Println(
 		pterm.LightCyan("" +
+			"                   " +
+			"Merry Memory" + "\n" +
 			"                     " +
 			pterm.Sprintf("v%s", string(versionInfo)) + "\n" +
 			"https://github.com/TriM-Organization/merry-memory",
