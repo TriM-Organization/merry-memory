@@ -55,14 +55,12 @@ func (c *converter) SetBlockByStatesString(blockName string, blockStatesString s
 // SetBlockLegacy ..
 func (c *converter) SetBlockLegacy(blockName string, blockData uint16) error {
 	copiedStates := make(map[string]any)
-	if !strings.HasPrefix(blockName, "minecraft:") {
-		blockName = "minecraft:" + blockName
-	}
+	blockName = strings.TrimPrefix(blockName, "minecraft:")
 
 	temp, found := blocks.LegacyBlockToRuntimeID(blockName, blockData)
 	if !found {
 		newItem := itemupgrader.Upgrade(itemupgrader.ItemMeta{
-			Name: blockName,
+			Name: "minecraft:" + blockName,
 			Meta: int16(blockData),
 		})
 		if err := c.SetBlockByStatesString(newItem.Name, "[]"); err != nil {
@@ -71,10 +69,10 @@ func (c *converter) SetBlockLegacy(blockName string, blockData uint16) error {
 		return nil
 	}
 
-	name, states, _ := blocks.RuntimeIDToState(temp)
-	maps.Copy(copiedStates, states)
+	blockName, blockStates, _ := blocks.RuntimeIDToState(temp)
+	maps.Copy(copiedStates, blockStates)
 
-	err := c.SetBlock(name, copiedStates)
+	err := c.SetBlock(blockName, copiedStates)
 	if err != nil {
 		return fmt.Errorf("SetBlockLegacy: %v", err)
 	}
