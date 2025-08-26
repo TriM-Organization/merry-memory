@@ -14,8 +14,7 @@ var versionInfo []byte
 
 func init() {
 	temp := strings.Split(string(versionInfo), "\n")[0]
-	temp = strings.ReplaceAll(temp, "\r", "")
-	versionInfo = []byte(temp)
+	versionInfo = []byte(strings.TrimSpace(temp))
 }
 
 func main() {
