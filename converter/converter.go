@@ -159,7 +159,12 @@ func ConvertBDXToMCWorld(bdxPath string, mcworldPath string) error {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
 			}
 		case *command.PlaceBlockWithNBTData:
-			err = converter.SetNBTBlock(c.NBTData)
+			if err = converter.SetBlockByIndex(c.BlockConstantStringID, c.BlockStatesConstantStringID); err != nil {
+				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
+			}
+			if err = converter.SetNBTBlock(c.NBTData); err != nil {
+				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
+			}
 		case *command.Terminate:
 			if err = converter.mcworld.Close(); err != nil {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
