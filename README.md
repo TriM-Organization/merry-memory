@@ -20,8 +20,8 @@ The rising sun illuminated the earth. The swaying breeze caressed my face.
 
 
 ## List of Acknowledgments
-- This tools is depends on PhoenixBuilder which lead by **@LNSSPsd**
-- Leagcy block update is depends on a tool that open source before, which development by **@CMA2401PT**
+- This tools is depends on **PhoenixBuilder** which lead by **@LNSSPsd**
+- Leagcy block update is depends on a tool that open source before, which development by **@CMA2401PT** and **@CoozillaX**
 - **@EillesWan** improved the **BDump** documents, and this introduced me to **PhoenixBuilder** for the first time
 
 

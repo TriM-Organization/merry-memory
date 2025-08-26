@@ -150,7 +150,7 @@ func ConvertBDXToMCWorld(bdxPath string, mcworldPath string) error {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
 			}
 		case *command.AssignDebugData:
-			// Can support, but need ask Liliya233 and CMA2401PT
+			// Can support, but need ask CoozillaX(Liliya233) and CMA2401PT
 		case *command.PlaceBlockWithChestData:
 			if err = converter.SetBlockLegacyByIndex(c.BlockConstantStringID, c.BlockData); err != nil {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
