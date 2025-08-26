@@ -1,10 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/TriM-Organization/merry-memory/converter"
 )
@@ -21,16 +18,4 @@ func main() {
 
 	fmt.Println()
 	ReadStringFromPanel("程序运行完成, 按 [回车] 以退出。")
-}
-
-// ReadStringFromPanel ..
-func ReadStringFromPanel(langText string) (result string) {
-	fmt.Print(langText)
-
-	result, _ = bufio.NewReader(os.Stdin).ReadString('\n')
-	result = strings.ReplaceAll(result, "\n", "")
-	result = strings.ReplaceAll(result, "\r", "")
-	result = strings.ReplaceAll(result, "\t", "")
-
-	return
 }
