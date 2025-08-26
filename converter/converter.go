@@ -139,14 +139,14 @@ func ConvertBDXToMCWorld(bdxPath string, mcworldPath string) error {
 			if err = converter.SetRuntimeBlock(uint32(c.BlockRuntimeID)); err != nil {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
 			}
-			if err = converter.SetChestBlock(c.ChestSlots); err != nil {
+			if err = converter.SetContainerData(c.ChestSlots); err != nil {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
 			}
 		case *command.PlaceRuntimeBlockWithChestDataAndUint32RuntimeID:
 			if err = converter.SetRuntimeBlock(c.BlockRuntimeID); err != nil {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
 			}
-			if err = converter.SetChestBlock(c.ChestSlots); err != nil {
+			if err = converter.SetContainerData(c.ChestSlots); err != nil {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
 			}
 		case *command.AssignDebugData:
@@ -155,7 +155,7 @@ func ConvertBDXToMCWorld(bdxPath string, mcworldPath string) error {
 			if err = converter.SetBlockLegacyByIndex(c.BlockConstantStringID, c.BlockData); err != nil {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
 			}
-			if err = converter.SetChestBlock(c.ChestSlots); err != nil {
+			if err = converter.SetContainerData(c.ChestSlots); err != nil {
 				return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
 			}
 		case *command.PlaceBlockWithNBTData:
