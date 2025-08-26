@@ -1,21 +1,43 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
+	"strings"
 
 	"github.com/TriM-Organization/merry-memory/converter"
+	"github.com/pterm/pterm"
 )
 
+//go:embed version
+var versionInfo []byte
+
+func init() {
+	temp := strings.Split(string(versionInfo), "\n")[0]
+	temp = strings.ReplaceAll(temp, "\r", "")
+	versionInfo = []byte(temp)
+}
+
 func main() {
+	pterm.DefaultBox.Println(
+		pterm.LightCyan("" +
+			"                     " +
+			pterm.Sprintf("v%s", string(versionInfo)) + "\n" +
+			"https://github.com/TriM-Organization/merry-memory",
+		),
+	)
+
 	bdxPath := ReadStringFromPanel("请输入 BDX 文件路径: ")
 	mcworldPath := ReadStringFromPanel("请输入 mcworld 文件路径: ")
 
-	fmt.Println("转换正在进行中, 请坐与放松...")
+	pterm.Info.Println("转换正在进行中, 请坐与放松...")
 	err := converter.ConvertBDXToMCWorld(bdxPath, mcworldPath)
 	if err != nil {
-		fmt.Printf("处理时发生错误, 原因是: %v", err)
+		pterm.Error.Printfln("处理时发生错误, 原因是: %v", err)
 	}
 
 	fmt.Println()
-	ReadStringFromPanel("程序运行完成, 按 [回车] 以退出。")
+	ReadStringFromPanel(
+		pterm.Success.Sprint("程序运行完成, 按 [回车] 以退出。"),
+	)
 }

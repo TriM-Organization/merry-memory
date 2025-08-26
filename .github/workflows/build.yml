@@ -1,0 +1,64 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "cmd/version"
+  workflow_dispatch: {}
+
+jobs:
+  Builder:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: Check Should Build
+      id: test_should_build
+      run: |
+        cp .github/workflows/test_should_build.sh ./
+        sh test_should_build.sh
+        rm -rf test_should_build.sh
+      
+    - name: Build
+      if: steps.test_should_build.outputs.result == 'true'
+      run: |
+        mkdir release
+        cd cmd
+        android_arm64="GOOS=android GOARCH=arm64 go build -ldflags \"-s -w\" -o ../release/merry-memory_android_arm64"
+        echo $android_arm64 && eval $android_arm64
+        linux_amd64="GOOS=linux GOARCH=amd64 go build -ldflags \"-s -w\" -o ../release/merry-memory_linux_amd64"
+        echo $linux_amd64 && eval $linux_amd64
+        linux_arm64="GOOS=linux GOARCH=arm64 go build -ldflags \"-s -w\" -o ../release/merry-memory_linux_arm64"
+        echo $linux_arm64 && eval $linux_arm64
+        macos_amd64="GOOS=darwin GOARCH=amd64 go build -ldflags \"-s -w\" -o ../release/merry-memory_macos_amd64"
+        echo $macos_amd64 && eval $macos_amd64
+        macos_arm64="GOOS=darwin GOARCH=arm64 go build -ldflags \"-s -w\" -o ../release/merry-memory_macos_arm64"
+        echo $macos_arm64 && eval $macos_arm64
+        windows_amd64="GOOS=windows GOARCH=amd64 go build -ldflags \"-s -w\" -o ../release/merry-memory_windows_amd64.exe"
+        echo $windows_amd64 && eval $windows_amd64
+        windows_x86="GOOS=windows GOARCH=386 go build -ldflags \"-s -w\" -o ../release/merry-memory_windows_x86.exe"
+        echo $windows_x86 && eval $windows_x86
+    
+    - name: Version Getter
+      if: steps.test_should_build.outputs.result == 'true'
+      id: get_version
+      run: |
+        echo "name=v$(awk 'NR==1' cmd/version)" >> $GITHUB_OUTPUT
+      
+    - name: Commit Name Getter
+      if: steps.test_should_build.outputs.result == 'true'
+      id: get_commit_title
+      run: |
+        TITLE=$(git log -1 --pretty=%s)
+        echo "title=$TITLE" >> $GITHUB_OUTPUT
+        
+    - name: Release
+      if: steps.test_should_build.outputs.result == 'true'
+      uses: softprops/action-gh-release@v2
+      with:
+          tag_name: ${{ steps.get_version.outputs.name }}
+          body: ${{ steps.get_commit_title.outputs.title }}
+          files: ./release/*
