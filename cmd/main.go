@@ -38,7 +38,6 @@ func main() {
 	}
 
 	fmt.Println()
-	ReadStringFromPanel(
-		pterm.Success.Sprint("程序运行完成, 按 [回车] 以退出。"),
-	)
+	pterm.Success.Println("程序运行完成, 按 [回车] 以退出。")
+	fmt.Scanln()
 }
