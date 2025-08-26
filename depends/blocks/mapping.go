@@ -63,17 +63,17 @@ const (
 
 // blockEntry represents a block as found in a disk save of a world.
 type blockEntry struct {
-	Name    string                 `nbt:"name"`
-	State   map[string]interface{} `nbt:"states"`
-	Version int32                  `nbt:"version"`
-	ID      int32                  `nbt:"oldid,omitempty"` // PM writes this field, so we allow it anyway to avoid issues loading PM worlds.
-	Meta    int16                  `nbt:"val,omitempty"`
+	Name    string         `nbt:"name"`
+	State   map[string]any `nbt:"states"`
+	Version int32          `nbt:"version"`
+	ID      int32          `nbt:"oldid,omitempty"` // PM writes this field, so we allow it anyway to avoid issues loading PM worlds.
+	Meta    int16          `nbt:"val,omitempty"`
 }
 
 type GeneralBlock struct {
-	Name       string                 `nbt:"name"`
-	Properties map[string]interface{} `nbt:"states"`
-	Version    int32                  `nbt:"version"`
+	Name       string         `nbt:"name"`
+	Properties map[string]any `nbt:"states"`
+	Version    int32          `nbt:"version"`
 }
 
 type LegacyBlock struct {

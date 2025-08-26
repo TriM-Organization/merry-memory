@@ -8,7 +8,7 @@ import (
 type PlaceBlockWithNBTData struct {
 	BlockConstantStringID       uint16
 	BlockStatesConstantStringID uint16
-	NBTData                     map[string]interface{}
+	NBTData                     map[string]any
 }
 
 func (*PlaceBlockWithNBTData) ID() uint16 {
