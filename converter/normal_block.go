@@ -14,6 +14,11 @@ import (
 
 // SetBlock ..
 func (c *converter) SetBlock(blockName string, blockStates map[string]any) error {
+	if !c.placedFirstBlock {
+		c.penPos = utils.BlockPos{0, -64, 0}
+		c.placedFirstBlock = true
+	}
+
 	if !strings.HasPrefix(blockName, "minecraft:") {
 		blockName = "minecraft:" + blockName
 	}

@@ -11,10 +11,13 @@ import (
 
 // converter ..
 type converter struct {
-	mcworld       *utils.MCWorld
+	mcworld *utils.MCWorld
+
 	constStrings  []string
 	runtimeIDPool []*runtime_id_pool.ConstBlock
-	penPos        utils.BlockPos
+
+	penPos           utils.BlockPos
+	placedFirstBlock bool
 }
 
 // ConvertBDXToMCWorld ..
@@ -32,9 +35,11 @@ func ConvertBDXToMCWorld(bdxPath string, mcworldPath string) error {
 	}
 
 	converter := converter{
-		mcworld:      mcworld,
-		constStrings: nil,
-		penPos:       utils.BlockPos{0, -64, 0},
+		mcworld:          mcworld,
+		constStrings:     nil,
+		runtimeIDPool:    nil,
+		penPos:           utils.BlockPos{0, -64, 0},
+		placedFirstBlock: false,
 	}
 
 	for {
