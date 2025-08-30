@@ -61,14 +61,14 @@ func (r *Reader) String(x *string) {
 func (r *Reader) CString(x *string) {
 	buf := bytes.NewBufferString("")
 	for {
-		currentBytes, err := r.Reader().ReadByte()
+		currentByte, err := r.Reader().ReadByte()
 		if err != nil {
 			r.panic(err)
 		}
-		if currentBytes == 0 {
+		if currentByte == 0 {
 			break
 		}
-		buf.WriteByte(currentBytes)
+		buf.WriteByte(currentByte)
 	}
 	*x = buf.String()
 }
