@@ -22,10 +22,11 @@ type converter struct {
 
 // ConvertBDXToMCWorld ..
 func ConvertBDXToMCWorld(bdxPath string, mcworldPath string) error {
-	_, reader, err := utils.ReadBDXFileInfo(bdxPath)
+	_, reader, fileCloser, err := utils.ReadBDXFileInfo(bdxPath)
 	if err != nil {
 		return fmt.Errorf("ConvertBDXToMCWorld: %v", err)
 	}
+	defer fileCloser()
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()

@@ -106,9 +106,10 @@ func (m *MCWorld) Flush() {
 
 // Close ..
 func (m *MCWorld) Close() (err error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	m.closer.Do(func() {
-		m.mu.Lock()
-		defer m.mu.Unlock()
 		m.flush()
 		if err = m.gameSaves.CloseWorld(); err == nil {
 			m.internalCtxCancel()
@@ -118,6 +119,7 @@ func (m *MCWorld) Close() (err error) {
 		m.closer = new(sync.Once)
 		return fmt.Errorf("Close: %v", err)
 	}
+
 	return nil
 }
 

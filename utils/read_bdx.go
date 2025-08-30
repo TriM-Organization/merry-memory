@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/TriM-Organization/merry-memory/command"
@@ -12,45 +11,40 @@ import (
 )
 
 // ReadBDXFileInfo ..
-func ReadBDXFileInfo(path string) (authorName string, reader *encoding.Reader, err error) {
+func ReadBDXFileInfo(path string) (authorName string, reader *encoding.Reader, fileCloser func() error, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("ReadBDXFileInfo: %v", r)
 		}
 	}()
 
-	fileBytes, err := os.ReadFile(path)
+	file, err := os.Open(path)
 	if err != nil {
-		return "", nil, fmt.Errorf("ReadBDXFileInfo: %v", err)
+		return "", nil, nil, fmt.Errorf("ReadBDXFileInfo: %v", err)
 	}
 
-	if len(fileBytes) < 3 {
-		return "", nil, fmt.Errorf("ReadBDXFileInfo: Not a valid BDX file (Outside header too short)")
+	outsideHeader := make([]byte, 3)
+	readBytes, _ := file.Read(outsideHeader)
+	if readBytes < 3 {
+		return "", nil, nil, fmt.Errorf("ReadBDXFileInfo: Not a valid BDX file (Outside header too short)")
 	}
-	if string(fileBytes[0:3]) != "BD@" {
-		return "", nil, fmt.Errorf(`ReadBDXFileInfo: File outside header %#v not match magic string "BD@"`, string(fileBytes[0:3]))
-	}
-
-	buf := bytes.NewBuffer(fileBytes[3:])
-	brotliReader := brotli.NewReader(buf)
-	fileBytes, err = io.ReadAll(brotliReader)
-	if err != nil {
-		return "", nil, fmt.Errorf("ReadBDXFileInfo: %v", err)
+	if string(outsideHeader) != "BD@" {
+		return "", nil, nil, fmt.Errorf(`ReadBDXFileInfo: File outside header %#v not match magic string "BD@"`, string(outsideHeader))
 	}
 
-	if len(fileBytes) < 4 {
-		return "", nil, fmt.Errorf("ReadBDXFileInfo: Not a valid BDX file (Inside header too short)")
+	brotliReader := brotli.NewReader(file)
+	insideHeader := make([]byte, 4)
+	readBytes, _ = brotliReader.Read(insideHeader)
+	if readBytes < 4 {
+		return "", nil, nil, fmt.Errorf("ReadBDXFileInfo: Not a valid BDX file (Inside header too short)")
 	}
-	if !bytes.Equal(fileBytes[0:4], append([]byte("BDX"), 0)) {
-		return "", nil, fmt.Errorf(`ReadBDXFileInfo: File inside header %#v not match magic string "BDX\x00"`, fileBytes[0:4])
+	if !bytes.Equal(insideHeader, append([]byte("BDX"), 0)) {
+		return "", nil, nil, fmt.Errorf(`ReadBDXFileInfo: File inside header %#v not match magic string "BDX\x00"`, insideHeader)
 	}
-	fileBytes = fileBytes[4:]
 
-	buf = bytes.NewBuffer(fileBytes)
-	reader = encoding.NewReader(buf)
+	reader = encoding.NewReader(NewGeneralReader(brotliReader))
 	reader.CString(&authorName)
-
-	return authorName, reader, nil
+	return authorName, reader, file.Close, nil
 }
 
 // ReadBDXCommand ..
